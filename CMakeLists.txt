@@ -1,6 +1,6 @@
 # Copyright(c) 2019 spdlog authors Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-cmake_minimum_required(VERSION 3.10...3.21)
+cmake_minimum_required(VERSION 3.10...3.31)
 
 # ---------------------------------------------------------------------------------------
 # Start spdlog project
@@ -8,11 +8,14 @@ cmake_minimum_required(VERSION 3.10...3.21)
 include(cmake/utils.cmake)
 include(cmake/ide.cmake)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
+include(preproject)
 spdlog_extract_version()
 
 project(spdlog VERSION ${SPDLOG_VERSION} LANGUAGES CXX)
 message(STATUS "Build spdlog: ${SPDLOG_VERSION}")
 
+include(flags)
 include(GNUInstallDirs)
 
 # ---------------------------------------------------------------------------------------
@@ -341,6 +344,16 @@ endif()
 # ---------------------------------------------------------------------------------------
 if(SPDLOG_INSTALL)
     message(STATUS "Generating install")
+    if(DEFINED XP_INSTALL_CMAKEDIR)
+        set(XP_NAMESPACE xpro::)
+        set(libs spdlog spdlog_header_only)
+        list(TRANSFORM libs PREPEND ${XP_NAMESPACE})
+        set(targetsFile "spdlogConfigTargets")
+        xpPackageDevel(TARGETS_FILE ${targetsFile} LIBRARIES ${libs})
+        set(config_targets_file "${targetsFile}.cmake")
+        set(export_dest_dir "${XP_INSTALL_CMAKEDIR}")
+    else()
+    set(XP_NAMESPACE spdlog::)
     set(project_config_in "${CMAKE_CURRENT_LIST_DIR}/cmake/spdlogConfig.cmake.in")
     set(project_config_out "${CMAKE_CURRENT_BINARY_DIR}/spdlogConfig.cmake")
     set(config_targets_file "spdlogConfigTargets.cmake")
@@ -348,6 +361,7 @@ if(SPDLOG_INSTALL)
     set(export_dest_dir "${CMAKE_INSTALL_LIBDIR}/cmake/spdlog")
     set(pkgconfig_install_dir "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     set(pkg_config "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc")
+    endif()
 
     # ---------------------------------------------------------------------------------------
     # Include files
@@ -368,6 +382,7 @@ if(SPDLOG_INSTALL)
     # ---------------------------------------------------------------------------------------
     # Install pkg-config file
     # ---------------------------------------------------------------------------------------
+    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
     if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
         set(PKG_CONFIG_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
     else()
@@ -383,22 +398,27 @@ if(SPDLOG_INSTALL)
     string(CONCAT PKG_CONFIG_DEFINES "-D" "${PKG_CONFIG_DEFINES}")
     configure_file("cmake/${PROJECT_NAME}.pc.in" "${pkg_config}" @ONLY)
     install(FILES "${pkg_config}" DESTINATION "${pkgconfig_install_dir}")
+    endif()
 
     # ---------------------------------------------------------------------------------------
     # Install CMake config files
     # ---------------------------------------------------------------------------------------
-    export(TARGETS spdlog spdlog_header_only NAMESPACE spdlog::
+    export(TARGETS spdlog spdlog_header_only NAMESPACE ${XP_NAMESPACE}
            FILE "${CMAKE_CURRENT_BINARY_DIR}/${config_targets_file}")
-    install(EXPORT spdlog DESTINATION ${export_dest_dir} NAMESPACE spdlog:: FILE ${config_targets_file})
+    install(EXPORT spdlog DESTINATION ${export_dest_dir} NAMESPACE ${XP_NAMESPACE} FILE ${config_targets_file})
 
+    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
     include(CMakePackageConfigHelpers)
     configure_package_config_file("${project_config_in}" "${project_config_out}" INSTALL_DESTINATION ${export_dest_dir})
 
     write_basic_package_version_file("${version_config_file}" COMPATIBILITY SameMajorVersion)
     install(FILES "${project_config_out}" "${version_config_file}" DESTINATION "${export_dest_dir}")
+    endif()
 
     # ---------------------------------------------------------------------------------------
     # Support creation of installable packages
     # ---------------------------------------------------------------------------------------
+    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
     include(cmake/spdlogCPack.cmake)
+    endif()
 endif()
