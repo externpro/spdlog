@@ -231,7 +231,7 @@ if(SPDLOG_FMT_EXTERNAL OR SPDLOG_FMT_EXTERNAL_HO)
     elseif(NOT TARGET fmt::fmt)
         set(FMT_NAMESPACE fmt::)
         find_package(fmt CONFIG REQUIRED)
-    endif()
+    endif() # XP_INSTALL_CMAKEDIR
     target_compile_definitions(spdlog PUBLIC SPDLOG_FMT_EXTERNAL)
     target_compile_definitions(spdlog_header_only INTERFACE SPDLOG_FMT_EXTERNAL)
 
@@ -367,7 +367,7 @@ if(SPDLOG_INSTALL)
     set(export_dest_dir "${CMAKE_INSTALL_LIBDIR}/cmake/spdlog")
     set(pkgconfig_install_dir "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     set(pkg_config "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc")
-    endif()
+    endif() # XP_INSTALL_CMAKEDIR
 
     # ---------------------------------------------------------------------------------------
     # Include files
@@ -404,7 +404,7 @@ if(SPDLOG_INSTALL)
     string(CONCAT PKG_CONFIG_DEFINES "-D" "${PKG_CONFIG_DEFINES}")
     configure_file("cmake/${PROJECT_NAME}.pc.in" "${pkg_config}" @ONLY)
     install(FILES "${pkg_config}" DESTINATION "${pkgconfig_install_dir}")
-    endif()
+    endif() # XP_INSTALL_CMAKEDIR
 
     # ---------------------------------------------------------------------------------------
     # Install CMake config files
@@ -419,12 +419,12 @@ if(SPDLOG_INSTALL)
 
     write_basic_package_version_file("${version_config_file}" COMPATIBILITY SameMajorVersion)
     install(FILES "${project_config_out}" "${version_config_file}" DESTINATION "${export_dest_dir}")
-    endif()
+    endif() # XP_INSTALL_CMAKEDIR
 
     # ---------------------------------------------------------------------------------------
     # Support creation of installable packages
     # ---------------------------------------------------------------------------------------
     if(NOT DEFINED XP_INSTALL_CMAKEDIR)
     include(cmake/spdlogCPack.cmake)
-    endif()
+    endif() # XP_INSTALL_CMAKEDIR
 endif()
