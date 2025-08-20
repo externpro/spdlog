@@ -355,6 +355,11 @@ if(SPDLOG_INSTALL)
         set(libs spdlog spdlog_header_only)
         list(TRANSFORM libs PREPEND ${XP_NAMESPACE})
         set(targetsFile "spdlogConfigTargets")
+        string(JOIN "\n" EXT1
+          "set(THREAD_PREFER_PTHREAD_FLAG ON)"
+          "find_package(Threads REQUIRED) # depends on Threads::Threads"
+          ""
+          )
         xpPackageDevel(TARGETS_FILE ${targetsFile} DEPS fmt LIBRARIES ${libs})
         set(config_targets_file "${targetsFile}.cmake")
         set(export_dest_dir "${XP_INSTALL_CMAKEDIR}")
