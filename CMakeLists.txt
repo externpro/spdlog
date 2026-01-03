@@ -8,14 +8,12 @@ cmake_minimum_required(VERSION 3.10...3.31)
 include(cmake/utils.cmake)
 include(cmake/ide.cmake)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
-include(preproject)
 spdlog_extract_version()
 
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
 project(spdlog VERSION ${SPDLOG_VERSION} LANGUAGES CXX)
 message(STATUS "Build spdlog: ${SPDLOG_VERSION}")
 
-include(flags)
 include(GNUInstallDirs)
 
 # ---------------------------------------------------------------------------------------
