@@ -8,14 +8,12 @@ cmake_minimum_required(VERSION 3.10...3.31)
 include(cmake/utils.cmake)
 include(cmake/ide.cmake)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
-include(preproject)
 spdlog_extract_version()
 
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
 project(spdlog VERSION ${SPDLOG_VERSION} LANGUAGES CXX)
 message(STATUS "Build spdlog: ${SPDLOG_VERSION}")
 
-include(flags)
 include(GNUInstallDirs)
 
 # ---------------------------------------------------------------------------------------
@@ -223,25 +221,19 @@ target_link_libraries(spdlog_header_only INTERFACE Threads::Threads)
 # Use fmt package if using external fmt
 # ---------------------------------------------------------------------------------------
 if(SPDLOG_FMT_EXTERNAL OR SPDLOG_FMT_EXTERNAL_HO)
-    if(DEFINED XP_INSTALL_CMAKEDIR)
-        set(FMT_NAMESPACE xpro::)
-        if(NOT TARGET ${FMT_NAMESPACE}fmt)
-            xpFindPkg(PKGS fmt)
-        endif()
-    elseif(NOT TARGET fmt::fmt)
-        set(FMT_NAMESPACE fmt::)
+    if(NOT TARGET fmt::fmt)
         find_package(fmt CONFIG REQUIRED)
-    endif() # XP_INSTALL_CMAKEDIR
+    endif()
     target_compile_definitions(spdlog PUBLIC SPDLOG_FMT_EXTERNAL)
     target_compile_definitions(spdlog_header_only INTERFACE SPDLOG_FMT_EXTERNAL)
 
     # use external fmt-header-only
     if(SPDLOG_FMT_EXTERNAL_HO)
-        target_link_libraries(spdlog PUBLIC ${FMT_NAMESPACE}fmt-header-only)
-        target_link_libraries(spdlog_header_only INTERFACE ${FMT_NAMESPACE}fmt-header-only)
+        target_link_libraries(spdlog PUBLIC fmt::fmt-header-only)
+        target_link_libraries(spdlog_header_only INTERFACE fmt::fmt-header-only)
     else() # use external compile fmt
-        target_link_libraries(spdlog PUBLIC ${FMT_NAMESPACE}fmt)
-        target_link_libraries(spdlog_header_only INTERFACE ${FMT_NAMESPACE}fmt)
+        target_link_libraries(spdlog PUBLIC fmt::fmt)
+        target_link_libraries(spdlog_header_only INTERFACE fmt::fmt)
     endif()
 
     set(PKG_CONFIG_REQUIRES fmt) # add dependency to pkg-config
@@ -350,21 +342,20 @@ endif()
 # ---------------------------------------------------------------------------------------
 if(SPDLOG_INSTALL)
     message(STATUS "Generating install")
-    if(DEFINED XP_INSTALL_CMAKEDIR)
-        set(XP_NAMESPACE xpro::)
-        set(libs spdlog spdlog_header_only)
-        list(TRANSFORM libs PREPEND ${XP_NAMESPACE})
+    if(DEFINED XP_NAMESPACE)
         set(targetsFile "spdlogConfigTargets")
-        string(JOIN "\n" EXT1
-          "set(THREAD_PREFER_PTHREAD_FLAG ON)"
-          "find_package(Threads REQUIRED) # depends on Threads::Threads"
-          ""
+        xpExternPackage(NAMESPACE ${XP_NAMESPACE} ALIAS_NAMESPACE spdlog
+          TARGETS_FILE ${targetsFile} LIBRARIES spdlog spdlog_header_only
+          BASE v${SPDLOG_VERSION} XPDIFF "patch" FIND_THREADS DEPS fmt
+          WEB "https://github.com/gabime/spdlog/wiki" UPSTREAM "github.com/gabime/spdlog"
+          DESC "Fast C++ logging library"
+          LICENSE "[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')"
           )
-        xpPackageDevel(TARGETS_FILE ${targetsFile} DEPS fmt LIBRARIES ${libs})
         set(config_targets_file "${targetsFile}.cmake")
         set(export_dest_dir "${XP_INSTALL_CMAKEDIR}")
+        set(CMAKE_NAMESPACE ${XP_NAMESPACE})
     else()
-    set(XP_NAMESPACE spdlog::)
+    set(CMAKE_NAMESPACE spdlog)
     set(project_config_in "${CMAKE_CURRENT_LIST_DIR}/cmake/spdlogConfig.cmake.in")
     set(project_config_out "${CMAKE_CURRENT_BINARY_DIR}/spdlogConfig.cmake")
     set(config_targets_file "spdlogConfigTargets.cmake")
@@ -372,7 +363,7 @@ if(SPDLOG_INSTALL)
     set(export_dest_dir "${CMAKE_INSTALL_LIBDIR}/cmake/spdlog")
     set(pkgconfig_install_dir "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     set(pkg_config "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc")
-    endif() # XP_INSTALL_CMAKEDIR
+    endif() # XP_NAMESPACE
 
     # ---------------------------------------------------------------------------------------
     # Include files
@@ -393,7 +384,7 @@ if(SPDLOG_INSTALL)
     # ---------------------------------------------------------------------------------------
     # Install pkg-config file
     # ---------------------------------------------------------------------------------------
-    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
+    if(NOT DEFINED XP_NAMESPACE)
     if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
         set(PKG_CONFIG_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
     else()
@@ -409,27 +400,27 @@ if(SPDLOG_INSTALL)
     string(CONCAT PKG_CONFIG_DEFINES "-D" "${PKG_CONFIG_DEFINES}")
     configure_file("cmake/${PROJECT_NAME}.pc.in" "${pkg_config}" @ONLY)
     install(FILES "${pkg_config}" DESTINATION "${pkgconfig_install_dir}")
-    endif() # XP_INSTALL_CMAKEDIR
+    endif() # XP_NAMESPACE
 
     # ---------------------------------------------------------------------------------------
     # Install CMake config files
     # ---------------------------------------------------------------------------------------
-    export(TARGETS spdlog spdlog_header_only NAMESPACE ${XP_NAMESPACE}
+    export(TARGETS spdlog spdlog_header_only NAMESPACE ${CMAKE_NAMESPACE}::
            FILE "${CMAKE_CURRENT_BINARY_DIR}/${config_targets_file}")
-    install(EXPORT spdlog DESTINATION ${export_dest_dir} NAMESPACE ${XP_NAMESPACE} FILE ${config_targets_file})
+    install(EXPORT spdlog DESTINATION ${export_dest_dir} NAMESPACE ${CMAKE_NAMESPACE}:: FILE ${config_targets_file})
 
-    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
+    if(NOT DEFINED XP_NAMESPACE)
     include(CMakePackageConfigHelpers)
     configure_package_config_file("${project_config_in}" "${project_config_out}" INSTALL_DESTINATION ${export_dest_dir})
 
     write_basic_package_version_file("${version_config_file}" COMPATIBILITY SameMajorVersion)
     install(FILES "${project_config_out}" "${version_config_file}" DESTINATION "${export_dest_dir}")
-    endif() # XP_INSTALL_CMAKEDIR
+    endif() # XP_NAMESPACE
 
     # ---------------------------------------------------------------------------------------
     # Support creation of installable packages
     # ---------------------------------------------------------------------------------------
-    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
+    if(NOT DEFINED XP_NAMESPACE)
     include(cmake/spdlogCPack.cmake)
-    endif() # XP_INSTALL_CMAKEDIR
+    endif() # XP_NAMESPACE
 endif()
