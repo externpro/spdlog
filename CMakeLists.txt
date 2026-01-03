@@ -342,17 +342,15 @@ endif()
 # ---------------------------------------------------------------------------------------
 if(SPDLOG_INSTALL)
     message(STATUS "Generating install")
-    if(DEFINED XP_INSTALL_CMAKEDIR)
-        set(XP_NAMESPACE xpro::)
-        set(libs spdlog spdlog_header_only)
-        list(TRANSFORM libs PREPEND ${XP_NAMESPACE})
+    if(DEFINED XP_NAMESPACE)
         set(targetsFile "spdlogConfigTargets")
-        string(JOIN "\n" EXT1
-          "set(THREAD_PREFER_PTHREAD_FLAG ON)"
-          "find_package(Threads REQUIRED) # depends on Threads::Threads"
-          ""
+        xpExternPackage(NAMESPACE ${XP_NAMESPACE} ALIAS_NAMESPACE spdlog
+          TARGETS_FILE ${targetsFile} LIBRARIES spdlog spdlog_header_only
+          BASE v${SPDLOG_VERSION} XPDIFF "patch" FIND_THREADS DEPS fmt
+          WEB "https://github.com/gabime/spdlog/wiki" UPSTREAM "github.com/gabime/spdlog"
+          DESC "Fast C++ logging library"
+          LICENSE "[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')"
           )
-        xpPackageDevel(TARGETS_FILE ${targetsFile} DEPS fmt LIBRARIES ${libs})
         set(config_targets_file "${targetsFile}.cmake")
         set(export_dest_dir "${XP_INSTALL_CMAKEDIR}")
     else()
@@ -364,7 +362,7 @@ if(SPDLOG_INSTALL)
     set(export_dest_dir "${CMAKE_INSTALL_LIBDIR}/cmake/spdlog")
     set(pkgconfig_install_dir "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     set(pkg_config "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc")
-    endif() # XP_INSTALL_CMAKEDIR
+    endif() # XP_NAMESPACE
 
     # ---------------------------------------------------------------------------------------
     # Include files
