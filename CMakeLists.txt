@@ -385,7 +385,7 @@ if(SPDLOG_INSTALL)
     # ---------------------------------------------------------------------------------------
     # Install pkg-config file
     # ---------------------------------------------------------------------------------------
-    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
+    if(NOT DEFINED XP_NAMESPACE)
     if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
         set(PKG_CONFIG_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
     else()
@@ -401,7 +401,7 @@ if(SPDLOG_INSTALL)
     string(CONCAT PKG_CONFIG_DEFINES "-D" "${PKG_CONFIG_DEFINES}")
     configure_file("cmake/${PROJECT_NAME}.pc.in" "${pkg_config}" @ONLY)
     install(FILES "${pkg_config}" DESTINATION "${pkgconfig_install_dir}")
-    endif() # XP_INSTALL_CMAKEDIR
+    endif() # XP_NAMESPACE
 
     # ---------------------------------------------------------------------------------------
     # Install CMake config files
@@ -410,18 +410,18 @@ if(SPDLOG_INSTALL)
            FILE "${CMAKE_CURRENT_BINARY_DIR}/${config_targets_file}")
     install(EXPORT spdlog DESTINATION ${export_dest_dir} NAMESPACE ${XP_NAMESPACE} FILE ${config_targets_file})
 
-    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
+    if(NOT DEFINED XP_NAMESPACE)
     include(CMakePackageConfigHelpers)
     configure_package_config_file("${project_config_in}" "${project_config_out}" INSTALL_DESTINATION ${export_dest_dir})
 
     write_basic_package_version_file("${version_config_file}" COMPATIBILITY SameMajorVersion)
     install(FILES "${project_config_out}" "${version_config_file}" DESTINATION "${export_dest_dir}")
-    endif() # XP_INSTALL_CMAKEDIR
+    endif() # XP_NAMESPACE
 
     # ---------------------------------------------------------------------------------------
     # Support creation of installable packages
     # ---------------------------------------------------------------------------------------
-    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
+    if(NOT DEFINED XP_NAMESPACE)
     include(cmake/spdlogCPack.cmake)
-    endif() # XP_INSTALL_CMAKEDIR
+    endif() # XP_NAMESPACE
 endif()
