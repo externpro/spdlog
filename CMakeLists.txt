@@ -221,25 +221,19 @@ target_link_libraries(spdlog_header_only INTERFACE Threads::Threads)
 # Use fmt package if using external fmt
 # ---------------------------------------------------------------------------------------
 if(SPDLOG_FMT_EXTERNAL OR SPDLOG_FMT_EXTERNAL_HO)
-    if(DEFINED XP_INSTALL_CMAKEDIR)
-        set(FMT_NAMESPACE xpro::)
-        if(NOT TARGET ${FMT_NAMESPACE}fmt)
-            xpFindPkg(PKGS fmt)
-        endif()
-    elseif(NOT TARGET fmt::fmt)
-        set(FMT_NAMESPACE fmt::)
+    if(NOT TARGET fmt::fmt)
         find_package(fmt CONFIG REQUIRED)
-    endif() # XP_INSTALL_CMAKEDIR
+    endif()
     target_compile_definitions(spdlog PUBLIC SPDLOG_FMT_EXTERNAL)
     target_compile_definitions(spdlog_header_only INTERFACE SPDLOG_FMT_EXTERNAL)
 
     # use external fmt-header-only
     if(SPDLOG_FMT_EXTERNAL_HO)
-        target_link_libraries(spdlog PUBLIC ${FMT_NAMESPACE}fmt-header-only)
-        target_link_libraries(spdlog_header_only INTERFACE ${FMT_NAMESPACE}fmt-header-only)
+        target_link_libraries(spdlog PUBLIC fmt::fmt-header-only)
+        target_link_libraries(spdlog_header_only INTERFACE fmt::fmt-header-only)
     else() # use external compile fmt
-        target_link_libraries(spdlog PUBLIC ${FMT_NAMESPACE}fmt)
-        target_link_libraries(spdlog_header_only INTERFACE ${FMT_NAMESPACE}fmt)
+        target_link_libraries(spdlog PUBLIC fmt::fmt)
+        target_link_libraries(spdlog_header_only INTERFACE fmt::fmt)
     endif()
 
     set(PKG_CONFIG_REQUIRES fmt) # add dependency to pkg-config
