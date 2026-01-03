@@ -353,8 +353,9 @@ if(SPDLOG_INSTALL)
           )
         set(config_targets_file "${targetsFile}.cmake")
         set(export_dest_dir "${XP_INSTALL_CMAKEDIR}")
+        set(CMAKE_NAMESPACE ${XP_NAMESPACE})
     else()
-    set(XP_NAMESPACE spdlog::)
+    set(CMAKE_NAMESPACE spdlog)
     set(project_config_in "${CMAKE_CURRENT_LIST_DIR}/cmake/spdlogConfig.cmake.in")
     set(project_config_out "${CMAKE_CURRENT_BINARY_DIR}/spdlogConfig.cmake")
     set(config_targets_file "spdlogConfigTargets.cmake")
@@ -404,9 +405,9 @@ if(SPDLOG_INSTALL)
     # ---------------------------------------------------------------------------------------
     # Install CMake config files
     # ---------------------------------------------------------------------------------------
-    export(TARGETS spdlog spdlog_header_only NAMESPACE ${XP_NAMESPACE}
+    export(TARGETS spdlog spdlog_header_only NAMESPACE ${CMAKE_NAMESPACE}::
            FILE "${CMAKE_CURRENT_BINARY_DIR}/${config_targets_file}")
-    install(EXPORT spdlog DESTINATION ${export_dest_dir} NAMESPACE ${XP_NAMESPACE} FILE ${config_targets_file})
+    install(EXPORT spdlog DESTINATION ${export_dest_dir} NAMESPACE ${CMAKE_NAMESPACE}:: FILE ${config_targets_file})
 
     if(NOT DEFINED XP_NAMESPACE)
     include(CMakePackageConfigHelpers)
