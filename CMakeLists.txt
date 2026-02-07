@@ -352,7 +352,7 @@ if(SPDLOG_INSTALL)
           LICENSE "[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')"
           )
         set(config_targets_file "${targetsFile}.cmake")
-        set(export_dest_dir "${XP_INSTALL_CMAKEDIR}")
+        set(export_dest_dir "${CMAKE_INSTALL_CMAKEDIR}")
         set(CMAKE_NAMESPACE ${XP_NAMESPACE})
     else()
     set(CMAKE_NAMESPACE spdlog)
