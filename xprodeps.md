@@ -3,7 +3,7 @@
 |project|license [^_l]|description [dependencies]|version|source|diff [^_d]|
 |-------|-------------|--------------------------|-------|------|----------|
 |<a id='spdlog' />[spdlog](https://github.com/gabime/spdlog/wiki)|[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')|Fast C++ logging library [deps: _fmt_]| |[upstream](https://github.com/gabime/spdlog 'github.com/gabime/spdlog')|  [patch]|
-|<a id='fmt' />[fmt](https://fmt.dev/)|[MIT](https://github.com/fmtlib/fmt?tab=MIT-1-ov-file#readme 'MIT License')|A modern formatting library|[xpv11.2.0.15](https://github.com/externpro/fmt/releases/tag/xpv11.2.0.15 'release')|[repo](https://github.com/externpro/fmt 'github.com/externpro/fmt') [upstream](https://github.com/fmtlib/fmt 'github.com/fmtlib/fmt')|[diff](https://github.com/externpro/fmt/compare/11.2.0...xpv11.2.0.15 'github.com/externpro/fmt/compare/11.2.0...xpv11.2.0.15') [patch]|
+|<a id='fmt' />[fmt](https://fmt.dev/)|[MIT](https://github.com/fmtlib/fmt?tab=MIT-1-ov-file#readme 'MIT License')|A modern formatting library|[xpv12.1.0.1](https://github.com/externpro/fmt/releases/tag/xpv12.1.0.1 'release')|[repo](https://github.com/externpro/fmt 'github.com/externpro/fmt') [upstream](https://github.com/fmtlib/fmt 'github.com/fmtlib/fmt')|[diff](https://github.com/externpro/fmt/compare/12.1.0...xpv12.1.0.1 'github.com/externpro/fmt/compare/12.1.0...xpv12.1.0.1') [patch]|
 
 ![deps](xprodeps.svg 'dependencies')
 
