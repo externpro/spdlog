@@ -1,0 +1,19 @@
+{
+  "version": 8,
+  "configurePresets": [
+    {
+      "name": "config-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/_bld-${presetName}",
+      "cacheVariables": {
+        "SPDLOG_FMT_EXTERNAL": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "build-base",
+      "hidden": true
+    }
+  ]
+}
