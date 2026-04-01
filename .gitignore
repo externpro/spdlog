@@ -96,3 +96,8 @@ cmake-build-*/
 /.vs
 /out/build
 /CMakeSettings.json
+
+# externpro
+.env
+_bld*/
+docker-compose.override.yml
