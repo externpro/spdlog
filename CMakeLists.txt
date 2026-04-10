@@ -302,9 +302,10 @@ if(MSVC)
         # fmtlib requires the /utf-8 flag when building with msvc. see https://github.com/fmtlib/fmt/pull/4159 on the
         # purpose of the additional
         # "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>"
-        target_compile_options(spdlog PUBLIC $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
-        target_compile_options(spdlog_header_only
-                               INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
+        # which has been removed because generator expressions aren't supported by CPS
+        # see fmt issue https://github.com/externpro/fmt/issues/35 for explanation
+        target_compile_options(spdlog PUBLIC /utf-8)
+        target_compile_options(spdlog_header_only INTERFACE /utf-8)
     endif()
 endif()
 
