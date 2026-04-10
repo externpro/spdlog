@@ -1,6 +1,6 @@
 # Copyright(c) 2019 spdlog authors Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-cmake_minimum_required(VERSION 3.10...3.31)
+cmake_minimum_required(VERSION 3.10...4.3)
 
 # ---------------------------------------------------------------------------------------
 # Start spdlog project
@@ -10,7 +10,6 @@ include(cmake/ide.cmake)
 
 spdlog_extract_version()
 
-set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
 project(spdlog VERSION ${SPDLOG_VERSION} LANGUAGES CXX)
 message(STATUS "Build spdlog: ${SPDLOG_VERSION}")
 
@@ -303,9 +302,10 @@ if(MSVC)
         # fmtlib requires the /utf-8 flag when building with msvc. see https://github.com/fmtlib/fmt/pull/4159 on the
         # purpose of the additional
         # "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>"
-        target_compile_options(spdlog PUBLIC $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
-        target_compile_options(spdlog_header_only
-                               INTERFACE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
+        # which has been removed because generator expressions aren't supported by CPS
+        # see fmt issue https://github.com/externpro/fmt/issues/35 for explanation
+        target_compile_options(spdlog PUBLIC /utf-8)
+        target_compile_options(spdlog_header_only INTERFACE /utf-8)
     endif()
 endif()
 
@@ -351,17 +351,6 @@ endif()
 # ---------------------------------------------------------------------------------------
 if(SPDLOG_INSTALL)
     message(STATUS "Generating install")
-    if(COMMAND xpExternPackage)
-        set(targetsFile "spdlogConfigTargets")
-        xpExternPackage(TARGETS_FILE ${targetsFile} LIBRARIES spdlog spdlog_header_only
-          BASE v${SPDLOG_VERSION} XPDIFF "patch" FIND_THREADS DEPS fmt
-          WEB "https://github.com/gabime/spdlog/wiki" UPSTREAM "github.com/gabime/spdlog"
-          DESC "Fast C++ logging library"
-          LICENSE "[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')"
-          )
-        set(config_targets_file "${targetsFile}.cmake")
-        set(export_dest_dir "${CMAKE_INSTALL_CMAKEDIR}")
-    else()
     set(project_config_in "${CMAKE_CURRENT_LIST_DIR}/cmake/spdlogConfig.cmake.in")
     set(project_config_out "${CMAKE_CURRENT_BINARY_DIR}/spdlogConfig.cmake")
     set(config_targets_file "spdlogConfigTargets.cmake")
@@ -369,6 +358,16 @@ if(SPDLOG_INSTALL)
     set(export_dest_dir "${CMAKE_INSTALL_LIBDIR}/cmake/spdlog")
     set(pkgconfig_install_dir "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     set(pkg_config "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc")
+    if(COMMAND xpExternPackage)
+        xpExternPackage(EXPORT spdlog TARGETS_FILE spdlogConfigTargets
+          LIBRARIES spdlog spdlog_header_only DEFAULT_TARGETS spdlog
+          BASE v${SPDLOG_VERSION} XPDIFF "patch" DEPS fmt Threads
+          WEB "https://github.com/gabime/spdlog/wiki" UPSTREAM "github.com/gabime/spdlog"
+          DESC "Fast C++ logging library"
+          LICENSE "[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')"
+          )
+        set(export_dest_dir "${CMAKE_INSTALL_CMAKEDIR}")
+        set(pkgconfig_install_dir "${CMAKE_INSTALL_DATADIR}/pkgconfig")
     endif()
 
     # ---------------------------------------------------------------------------------------
@@ -390,7 +389,6 @@ if(SPDLOG_INSTALL)
     # ---------------------------------------------------------------------------------------
     # Install pkg-config file
     # ---------------------------------------------------------------------------------------
-    if(NOT COMMAND xpExternPackage)
     if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
         set(PKG_CONFIG_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
     else()
@@ -406,7 +404,6 @@ if(SPDLOG_INSTALL)
     string(CONCAT PKG_CONFIG_DEFINES "-D" "${PKG_CONFIG_DEFINES}")
     configure_file("cmake/${PROJECT_NAME}.pc.in" "${pkg_config}" @ONLY)
     install(FILES "${pkg_config}" DESTINATION "${pkgconfig_install_dir}")
-    endif()
 
     # ---------------------------------------------------------------------------------------
     # Install CMake config files
@@ -415,11 +412,13 @@ if(SPDLOG_INSTALL)
            FILE "${CMAKE_CURRENT_BINARY_DIR}/${config_targets_file}")
     install(EXPORT spdlog DESTINATION ${export_dest_dir} NAMESPACE spdlog:: FILE ${config_targets_file})
 
-    if(NOT COMMAND xpExternPackage)
     include(CMakePackageConfigHelpers)
     configure_package_config_file("${project_config_in}" "${project_config_out}" INSTALL_DESTINATION ${export_dest_dir})
 
     write_basic_package_version_file("${version_config_file}" COMPATIBILITY SameMajorVersion)
+    if(COMMAND xpExternPackage)
+        install(FILES "${version_config_file}" DESTINATION "${export_dest_dir}")
+    else()
     install(FILES "${project_config_out}" "${version_config_file}" DESTINATION "${export_dest_dir}")
     endif()
 
