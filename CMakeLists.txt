@@ -304,8 +304,8 @@ if(MSVC)
         # "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>"
         # which has been removed because generator expressions aren't supported by CPS
         # see fmt issue https://github.com/externpro/fmt/issues/35 for explanation
-        target_compile_options(spdlog PUBLIC /utf-8)
-        target_compile_options(spdlog_header_only INTERFACE /utf-8)
+        target_compile_options(spdlog PUBLIC "/utf-8")
+        target_compile_options(spdlog_header_only INTERFACE "/utf-8")
     endif()
 endif()
 
