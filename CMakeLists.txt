@@ -359,9 +359,12 @@ if(SPDLOG_INSTALL)
     set(pkgconfig_install_dir "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     set(pkg_config "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc")
     if(COMMAND xpExternPackage)
+        if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+            set(optParams FIND_XPRO_CMAKE) # /utf-8 flag disregarded with CPS
+        endif()
         xpExternPackage(EXPORT spdlog TARGETS_FILE spdlogConfigTargets
           LIBRARIES spdlog spdlog_header_only DEFAULT_TARGETS spdlog
-          BASE v${SPDLOG_VERSION} XPDIFF "patch" DEPS fmt Threads
+          BASE v${SPDLOG_VERSION} XPDIFF "patch" ${optParams}
           WEB "https://github.com/gabime/spdlog/wiki" UPSTREAM "github.com/gabime/spdlog"
           DESC "Fast C++ logging library"
           LICENSE "[MIT](https://github.com/gabime/spdlog?tab=License-1-ov-file 'MIT License')"
